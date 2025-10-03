@@ -11,15 +11,20 @@ import {
   Flex,
   Button,
   SimpleGrid,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { data } from "../utils/data";
 import { LabelBadges } from "../components/LabelBadges";
-
+import { StickyHeader } from "../components/StickyHeader";
 export const RecipeListPage = ({ onSelectedRecipe }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedHealthLabels, setSelectedHealthLabels] = useState([]);
   const [selectedDiets, setSelectedDiets] = useState([]);
   const [selectedIngredient, setSelectedIngredient] = useState("");
+
+  const bg = useColorModeValue("gray.50", "gray.900");
+  const cardBg = useColorModeValue("white", "gray.700");
+  const textColor = useColorModeValue("gray.600", "gray.300");
 
   const allIngredients = Array.from(
     new Set(
@@ -34,6 +39,26 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
     setSelectedHealthLabels([]);
     setSelectedDiets([]);
     setSelectedIngredient("");
+  };
+
+  const suggestRecipe = () => {
+    const hour = new Date().getHours();
+    let meal;
+
+    if (hour < 11) meal = "Breakfast";
+    else if (hour < 17) meal = "Lunch";
+    else meal = "Dinner";
+
+    const matching = data.hits.filter(({ recipe }) =>
+      recipe.mealType?.includes(meal)
+    );
+
+    const pool = matching.length > 0 ? matching : data.hits;
+    const random = pool[Math.floor(Math.random() * pool.length)];
+
+    if (random) {
+      onSelectedRecipe(random.recipe);
+    }
   };
 
   const filteredRecipes = data.hits.filter(({ recipe }) => {
@@ -71,43 +96,20 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
   return (
     <>
       {/* Sticky header */}
-      <Box
-        position="sticky"
-        top="0"
-        zIndex="10"
-        bg="gray.50"
-        py={4}
-        px={6}
-        boxShadow="sm"
-      >
-        <Flex justify="space-between" align="center">
-          <Image
-            src="/TasteScoutLogo.png"
-            alt="Taste Scout Logo"
-            boxSize="80px"
-            objectFit="contain"
-          />
-          <Box flex="1" textAlign="center">
-            <Heading color="teal.600" mb="0">
-              Taste Scout
-            </Heading>
-          </Box>
-          <Box w="60px" />
-        </Flex>
-      </Box>
+      <StickyHeader title="Taste Scout" onSuggest={suggestRecipe} />
 
       {/* Main content */}
-      <Box bg="gray.50" p={6}>
-        <Flex align="start" gap={6}>
+      <Box bg={bg} p={{ base: 4, md: 6 }}>
+        <Flex direction={{ base: "column", md: "row" }} align="start" gap={6}>
           {/* Sidebar filters */}
           <Box
-            w="250px"
-            bg="white"
+            w={{ base: "100%", md: "250px" }}
+            bg={cardBg}
             p={4}
             borderRadius="md"
             boxShadow="sm"
-            position="sticky"
-            top="125px"
+            position={{ base: "static", md: "sticky" }}
+            top="100px"
             alignSelf="start"
           >
             <Image
@@ -115,10 +117,11 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
               alt="Grappige cartoon chef"
               borderRadius="xl"
               mb={4}
-              boxSize="200px"
+              boxSize="150px"
               objectFit="cover"
+              mx="auto"
             />
-            <Heading size="md" mb={4}>
+            <Heading size="md" mb={4} textAlign="center" color="teal.400">
               Filters
             </Heading>
 
@@ -131,7 +134,7 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
               mb={4}
             />
 
-            <Text fontWeight="bold" mb={2}>
+            <Text fontWeight="bold" mb={2} color={textColor}>
               Health labels:
             </Text>
             <CheckboxGroup
@@ -146,7 +149,7 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
               </Stack>
             </CheckboxGroup>
 
-            <Text fontWeight="bold" mt={4} mb={2}>
+            <Text fontWeight="bold" mt={4} mb={2} color={textColor}>
               Diet:
             </Text>
             <CheckboxGroup value={selectedDiets} onChange={setSelectedDiets}>
@@ -157,10 +160,19 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
               </Stack>
             </CheckboxGroup>
 
-            <Text fontWeight="bold" mt={4} mb={2}>
+            <Text fontWeight="bold" mt={4} mb={2} color={textColor}>
               Ingredient:
             </Text>
+            <Box mb={2}>
+              <label
+                htmlFor="ingredient-select"
+                style={{ fontWeight: "bold", color: textColor }}
+              >
+                Select ingredient:
+              </label>
+            </Box>
             <select
+              id="ingredient-select"
               value={selectedIngredient}
               onChange={(e) => setSelectedIngredient(e.target.value)}
               style={{
@@ -185,11 +197,11 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
               colorScheme="teal"
               mt={4}
               size="sm"
+              w="100%"
             >
               Reset filters
             </Button>
           </Box>
-
           {/* Recipe grid */}
           <Box flex="1">
             {filteredRecipes.length === 0 ? (
@@ -204,7 +216,10 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
                 reset filters.
               </Text>
             ) : (
-              <SimpleGrid columns={5} spacing={6}>
+              <SimpleGrid
+                columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }}
+                spacing={6}
+              >
                 {filteredRecipes.map(({ recipe }) => (
                   <Box
                     key={recipe.label}
@@ -215,56 +230,58 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
                     cursor="pointer"
                     onClick={() => onSelectedRecipe(recipe)}
                     _hover={{
-                      transform: "scale(1.25)",
+                      transform: "scale(1.05)",
                       transition: "0.2s",
-                      bg: "gray.100",
+                      bg: useColorModeValue("gray.100", "gray.600"),
                     }}
-                    bg="gray.50"
+                    bg={cardBg}
+                    minH="320px"
+                    display="flex"
+                    flexDirection="column"
+                    justifyContent="space-between"
                   >
                     <Image
                       src={recipe.image}
                       alt={recipe.label}
-                      boxSize={{ base: "100%", md: "150px" }}
+                      maxH="180px"
                       objectFit="cover"
                       borderRadius="lg"
                       mx="auto"
-                      mb={4}
+                      mb={2}
                     />
 
-                    <Heading
-                      size="md"
-                      mb={2}
-                      color="teal.600"
-                      textAlign="center"
-                    >
-                      {recipe.label}
-                    </Heading>
+                    <Box textAlign="center">
+                      <Heading size="md" mt={2} mb={2} color="teal.400">
+                        {recipe.label}
+                      </Heading>
 
-                    {recipe.dietLabels.length > 0 && (
-                      <Text fontSize="sm" color="gray.600" textAlign="center">
-                        <strong>Diet: </strong> {recipe.dietLabels.join(", ")}
-                      </Text>
-                    )}
+                      {recipe.dietLabels.length > 0 && (
+                        <Text fontSize="sm" color={textColor}>
+                          <strong>Diet: </strong> {recipe.dietLabels.join(", ")}
+                        </Text>
+                      )}
 
-                    {recipe.cautions.length > 0 && (
-                      <Text fontSize="sm" color="red.500">
-                        <strong>Warning: </strong> {recipe.cautions.join(", ")}
-                      </Text>
-                    )}
+                      {recipe.cautions.length > 0 && (
+                        <Text fontSize="sm" color="red.400">
+                          <strong>Warning: </strong>{" "}
+                          {recipe.cautions.join(", ")}
+                        </Text>
+                      )}
 
-                    {recipe.mealType && (
-                      <Text fontSize="sm" color="gray.600">
-                        <strong>Meal type: </strong>{" "}
-                        {recipe.mealType.join(", ")}
-                      </Text>
-                    )}
+                      {recipe.mealType && (
+                        <Text fontSize="sm" color={textColor}>
+                          <strong>Meal type: </strong>{" "}
+                          {recipe.mealType.join(", ")}
+                        </Text>
+                      )}
 
-                    {recipe.dishType && (
-                      <Text fontSize="sm" color="gray.600">
-                        <strong>Dish type: </strong>{" "}
-                        {recipe.dishType.join(", ")}
-                      </Text>
-                    )}
+                      {recipe.dishType && (
+                        <Text fontSize="sm" color={textColor}>
+                          <strong>Dish type: </strong>{" "}
+                          {recipe.dishType.join(", ")}
+                        </Text>
+                      )}
+                    </Box>
 
                     <LabelBadges
                       dietLabels={recipe.dietLabels}
