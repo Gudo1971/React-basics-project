@@ -1,133 +1,159 @@
 import {
   Box,
   Image,
-  Text,
-  VStack,
   Heading,
-  Badge,
+  Text,
   Stack,
-  List,
-  ListItem,
-  Divider,
   Button,
+  SimpleGrid,
+  Grid,
+  GridItem,
 } from "@chakra-ui/react";
+import { ArrowBackIcon, CheckCircleIcon } from "@chakra-ui/icons";
+import { LabelBadges } from "../components/LabelBadges";
 
 export const RecipePage = ({ recipe, onBack }) => {
   if (!recipe) return null;
 
-  const {
-    label,
-    image,
-    mealType,
-    dishType,
-    totalTime,
-    dietLabels,
-    healthLabels,
-    cautions,
-    ingredientLines,
-    yield: servings,
-    totalNutrients,
-  } = recipe;
-
   return (
-    <VStack spacing={6} p={6} align="stretch ">
-      <Button alignSelf="start" onClick={onBack}>
-        ← Back to recipes
+    <Box bg="gray.50" p={6}>
+      <Button
+        leftIcon={<ArrowBackIcon />}
+        colorScheme="teal"
+        mb={6}
+        onClick={onBack}
+        position="sticky"
+        top="100px"
+        zIndex="10"
+      >
+        Back to recipes
       </Button>
 
-      <Heading textAlign="center"> {label}</Heading>
-      <Image src={image} alt={label} borderRadius="md" />
+      <Box
+        maxW="6xl"
+        mx="auto"
+        bg="white"
+        p={6}
+        borderRadius="2xl"
+        boxShadow="2xl"
+        maxH="100vh"
+        overflowY="auto"
+      >
+        <Image
+          src={recipe.image}
+          alt={recipe.label}
+          borderRadius="xl"
+          w="100%"
+          maxH={{ base: "250px", md: "300px" }}
+          objectFit="cover"
+          mb={6}
+          boxShadow="lg"
+        />
 
-      <Box>
-        <Text>
-          <strong>Meal Type</strong>
-          {mealType?.join(", ")}
-        </Text>
-        <Text>
-          <strong>Dish Tpe</strong>
-          {dishType?.join(", ")}
-        </Text>
-        <Text>
-          <strong>Total coocking time</strong>
-          {totalTime} minutes{" "}
-        </Text>
-        <Text>
-          <strong>Servings</strong>
-          {servings}
-        </Text>
-      </Box>
-      <Divider />
+        <Heading size="xl" textAlign="center" color="teal.600" mb={4}>
+          {recipe.label}
+        </Heading>
 
-      <Box>
-        <Text>
-          <strong>Diet Labels:</strong>
-          {dietLabels?.join(", ")}
-        </Text>
-        <Text>
-          <strong>Health Labels:</strong>
-        </Text>
-        <Stack direction="row" wrap="wrap">
-          {healthLabels.map((label) => (
-            <Badge key={label} colorScheme="green" m={1}>
-              {label}
-            </Badge>
-          ))}
-        </Stack>
+        <LabelBadges
+          dietLabels={recipe.dietLabels}
+          healthLabels={recipe.healthLabels}
+        />
 
-        {cautions.length > 0 && (
-          <>
-            <Text mt={4}>
-              <strong>Cautions:</strong>
+        {recipe.cautions.length > 0 && (
+          <Box
+            bg="red.50"
+            p={4}
+            borderRadius="xl"
+            boxShadow="md"
+            mb={6}
+            textAlign="center"
+          >
+            <Heading size="sm" color="red.600" mb={2}>
+              ⚠️ Health Warnings
+            </Heading>
+            <Text color="red.500" fontWeight="medium">
+              {recipe.cautions.join(", ")}
             </Text>
-            <Stack direction="row" wrap="wrap">
-              {cautions.map((caution) => (
-                <Badge key={caution} colorScheme="red" m={1}>
-                  {caution}
-                </Badge>
-              ))}
-            </Stack>
-          </>
+          </Box>
         )}
-      </Box>
 
-      <Divider />
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} mb={6}>
+          {/* Ingrediënten */}
+          <Box>
+            <Heading size="md" mb={4} color="teal.500">
+              🧾 Ingredients
+            </Heading>
+            <Box maxH="300px" overflowY="auto" pr={2}>
+              <Grid templateColumns="repeat(2, 1fr)" gap={3}>
+                {recipe.ingredients.map((ingredient, index) => (
+                  <GridItem key={index} display="flex" alignItems="start">
+                    <CheckCircleIcon color="teal.400" mt={1} mr={2} />
+                    <Text>{ingredient.text}</Text>
+                  </GridItem>
+                ))}
+              </Grid>
+            </Box>
+          </Box>
 
-      <Box>
-        <Text>
-          <strong>Ingredients:</strong>
+          {/* Nutrition Info */}
+          <Box alignSelf="start" ml={{ base: 0, md: 80 }}>
+            <Heading size="md" mb={4} color="teal.500">
+              🥦 Nutrition Info
+            </Heading>
+            <Stack spacing={2}>
+              {recipe.totalNutrients.ENERC_KCAL?.quantity && (
+                <Text>
+                  <strong>Calories:</strong>{" "}
+                  {Math.round(recipe.totalNutrients.ENERC_KCAL.quantity)} kcal
+                </Text>
+              )}
+              {recipe.totalNutrients.FAT?.quantity && (
+                <Text>
+                  <strong>Fat:</strong>{" "}
+                  {Math.round(recipe.totalNutrients.FAT.quantity)} g
+                </Text>
+              )}
+              {recipe.totalNutrients.CHOCDF?.quantity && (
+                <Text>
+                  <strong>Carbs:</strong>{" "}
+                  {Math.round(recipe.totalNutrients.CHOCDF.quantity)} g
+                </Text>
+              )}
+              {recipe.totalNutrients.PROCNT?.quantity && (
+                <Text>
+                  <strong>Protein:</strong>{" "}
+                  {Math.round(recipe.totalNutrients.PROCNT.quantity)} g
+                </Text>
+              )}
+              {recipe.totalNutrients.FIBTG?.quantity && (
+                <Text>
+                  <strong>Fiber:</strong>{" "}
+                  {Math.round(recipe.totalNutrients.FIBTG.quantity)} g
+                </Text>
+              )}
+              {recipe.totalNutrients.SUGAR?.quantity && (
+                <Text>
+                  <strong>Sugar:</strong>{" "}
+                  {Math.round(recipe.totalNutrients.SUGAR.quantity)} g
+                </Text>
+              )}
+              {recipe.totalNutrients.NA?.quantity && (
+                <Text>
+                  <strong>Sodium:</strong>{" "}
+                  {Math.round(recipe.totalNutrients.NA.quantity)} mg
+                </Text>
+              )}
+            </Stack>
+          </Box>
+        </SimpleGrid>
+
+        <Text fontStyle="italic" textAlign="center" mt={6}>
+          Source:{" "}
+          <a href={recipe.url} target="_blank" rel="noopener noreferrer">
+            {recipe.source}
+          </a>
         </Text>
-        <List spacing={2} mt={2}>
-          {ingredientLines.map((line, index) => (
-            <ListItem key={index}>• {line}</ListItem>
-          ))}
-        </List>
       </Box>
-
-      <Divider />
-
-      <Box>
-        <Text>
-          <strong>Total nutrients:</strong>
-        </Text>
-        <List spacing={1} mt={2}>
-          <ListItem>
-            Energy: {Math.round(totalNutrients.ENERC_KCAL?.quantity)} kcal
-          </ListItem>
-          <ListItem>
-            Protein: {Math.round(totalNutrients.PROCNT?.quantity)} g
-          </ListItem>
-          <ListItem>Fat {Math.round(totalNutrients.FAT?.quantity)} g</ListItem>
-          <ListItem>
-            Carbs: {Math.round(totalNutrients.CHOCDF?.quantity)} g
-          </ListItem>
-          <ListItem>
-            Cholesterol: {Math.round(totalNutrients.CHOLE?.quantity)} mg
-          </ListItem>
-          <ListItem>
-            Sodium: {Math.round(totalNutrients.NA?.quantity)} mg
-          </ListItem>
-        </List>
-      </Box>
-    </VStack>
+    </Box>
   );
 };
