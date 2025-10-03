@@ -16,14 +16,14 @@ export const RecipePage = ({ recipe, onBack }) => {
   if (!recipe) return null;
 
   return (
-    <Box bg="gray.50" p={6}>
+    <Box bg="gray.50" p={{ base: 4, md: 6 }}>
       <Button
         leftIcon={<ArrowBackIcon />}
         colorScheme="teal"
         mb={6}
         onClick={onBack}
         position="sticky"
-        top="100px"
+        top="80px"
         zIndex="10"
       >
         Back to recipes
@@ -33,7 +33,7 @@ export const RecipePage = ({ recipe, onBack }) => {
         maxW="6xl"
         mx="auto"
         bg="white"
-        p={6}
+        p={{ base: 4, md: 6 }}
         borderRadius="2xl"
         boxShadow="2xl"
         maxH="100vh"
@@ -50,7 +50,12 @@ export const RecipePage = ({ recipe, onBack }) => {
           boxShadow="lg"
         />
 
-        <Heading size="xl" textAlign="center" color="teal.600" mb={4}>
+        <Heading
+          size="xl"
+          textAlign={{ base: "center", md: "left" }}
+          color="teal.600"
+          mb={4}
+        >
           {recipe.label}
         </Heading>
 
@@ -84,7 +89,7 @@ export const RecipePage = ({ recipe, onBack }) => {
               🧾 Ingredients
             </Heading>
             <Box maxH="300px" overflowY="auto" pr={2}>
-              <Grid templateColumns="repeat(2, 1fr)" gap={3}>
+              <Grid templateColumns={{ base: "1fr", sm: "1fr 1fr" }} gap={3}>
                 {recipe.ingredients.map((ingredient, index) => (
                   <GridItem key={index} display="flex" alignItems="start">
                     <CheckCircleIcon color="teal.400" mt={1} mr={2} />
@@ -96,7 +101,7 @@ export const RecipePage = ({ recipe, onBack }) => {
           </Box>
 
           {/* Nutrition Info */}
-          <Box alignSelf="start" ml={{ base: 0, md: 80 }}>
+          <Box alignSelf="start" ml={{ base: 0, md: 12 }}>
             <Heading size="md" mb={4} color="teal.500">
               🥦 Nutrition Info
             </Heading>

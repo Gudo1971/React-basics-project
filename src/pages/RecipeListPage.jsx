@@ -4,7 +4,6 @@ import {
   Image,
   Text,
   Stack,
-  Badge,
   Heading,
   Input,
   Checkbox,
@@ -14,14 +13,13 @@ import {
   SimpleGrid,
 } from "@chakra-ui/react";
 import { data } from "../utils/data";
+import { LabelBadges } from "../components/LabelBadges";
 
 export const RecipeListPage = ({ onSelectedRecipe }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedHealthLabels, setSelectedHealthLabels] = useState([]);
   const [selectedDiets, setSelectedDiets] = useState([]);
   const [selectedIngredient, setSelectedIngredient] = useState("");
-
-  // filter on selected ingredient
 
   const allIngredients = Array.from(
     new Set(
@@ -72,6 +70,7 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
 
   return (
     <>
+      {/* Sticky header */}
       <Box
         position="sticky"
         top="0"
@@ -82,28 +81,25 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
         boxShadow="sm"
       >
         <Flex justify="space-between" align="center">
-          {/* Logo links */}
           <Image
             src="/TasteScoutLogo.png"
             alt="Taste Scout Logo"
             boxSize="80px"
             objectFit="contain"
           />
-
-          {/* Titel gecentreerd */}
           <Box flex="1" textAlign="center">
             <Heading color="teal.600" mb="0">
               Taste Scout
             </Heading>
           </Box>
-
-          {/* Lege ruimte rechts voor balans */}
           <Box w="60px" />
         </Flex>
       </Box>
 
+      {/* Main content */}
       <Box bg="gray.50" p={6}>
         <Flex align="start" gap={6}>
+          {/* Sidebar filters */}
           <Box
             w="250px"
             bg="white"
@@ -143,18 +139,10 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
               onChange={setSelectedHealthLabels}
             >
               <Stack spacing={2}>
-                <Checkbox value="Gluten-Free" w="full" justifyContent="start">
-                  Gluten Free
-                </Checkbox>
-                <Checkbox value="Dairy-Free" w="full" justifyContent="start">
-                  Dairy Free
-                </Checkbox>
-                <Checkbox value="Sesame-Free" w="full" justifyContent="start">
-                  Sesame Free
-                </Checkbox>
-                <Checkbox value="Soy-Free" w="full" justifyContent="start">
-                  Soy Free
-                </Checkbox>
+                <Checkbox value="Gluten-Free">Gluten Free</Checkbox>
+                <Checkbox value="Dairy-Free">Dairy Free</Checkbox>
+                <Checkbox value="Sesame-Free">Sesame Free</Checkbox>
+                <Checkbox value="Soy-Free">Soy Free</Checkbox>
               </Stack>
             </CheckboxGroup>
 
@@ -163,15 +151,9 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
             </Text>
             <CheckboxGroup value={selectedDiets} onChange={setSelectedDiets}>
               <Stack spacing={2}>
-                <Checkbox value="Vegan" w="full" justifyContent="start">
-                  Vegan
-                </Checkbox>
-                <Checkbox value="Vegetarian" w="full" justifyContent="start">
-                  Vegetarian
-                </Checkbox>
-                <Checkbox value="Pescatarian" w="full" justifyContent="start">
-                  Pescatarian
-                </Checkbox>
+                <Checkbox value="Vegan">Vegan</Checkbox>
+                <Checkbox value="Vegetarian">Vegetarian</Checkbox>
+                <Checkbox value="Pescatarian">Pescatarian</Checkbox>
               </Stack>
             </CheckboxGroup>
 
@@ -208,6 +190,7 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
             </Button>
           </Box>
 
+          {/* Recipe grid */}
           <Box flex="1">
             {filteredRecipes.length === 0 ? (
               <Text
@@ -225,7 +208,6 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
                 {filteredRecipes.map(({ recipe }) => (
                   <Box
                     key={recipe.label}
-                    borderWidth="25px"
                     borderRadius="2xl"
                     boxShadow="xl"
                     overflow="hidden"
@@ -257,8 +239,9 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
                     >
                       {recipe.label}
                     </Heading>
+
                     {recipe.dietLabels.length > 0 && (
-                      <Text fontSize="sm" color="gray.600 " textAlign="center">
+                      <Text fontSize="sm" color="gray.600" textAlign="center">
                         <strong>Diet: </strong> {recipe.dietLabels.join(", ")}
                       </Text>
                     )}
@@ -268,12 +251,14 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
                         <strong>Warning: </strong> {recipe.cautions.join(", ")}
                       </Text>
                     )}
+
                     {recipe.mealType && (
                       <Text fontSize="sm" color="gray.600">
                         <strong>Meal type: </strong>{" "}
                         {recipe.mealType.join(", ")}
                       </Text>
                     )}
+
                     {recipe.dishType && (
                       <Text fontSize="sm" color="gray.600">
                         <strong>Dish type: </strong>{" "}
@@ -281,14 +266,10 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
                       </Text>
                     )}
 
-                    <Stack direction="row" mt={2}>
-                      {recipe.healthLabels.includes("Vegan") && (
-                        <Badge colorScheme="green">Vegan </Badge>
-                      )}
-                      {recipe.healthLabels.includes("Vegetarian") && (
-                        <Badge colorScheme="purple">Vegetarian </Badge>
-                      )}
-                    </Stack>
+                    <LabelBadges
+                      dietLabels={recipe.dietLabels}
+                      healthLabels={recipe.healthLabels}
+                    />
                   </Box>
                 ))}
               </SimpleGrid>
