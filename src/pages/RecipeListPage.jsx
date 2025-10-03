@@ -35,7 +35,7 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
                 objectFit="cover"
               />
               <Box>
-                <heading size="md"> {recipe.label}</heading>
+                <Heading size="md"> {recipe.label}</Heading>
 
                 {recipe.dietLabels.length > 0 && (
                   <Text>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { RecipeListPage } from "./pages/RecipeListPage";
-//import RecipePage from "./components/ui/RecipePage";
+import { RecipePage } from "./pages/RecipePage";
 
 export const App = () => {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
@@ -9,7 +9,7 @@ export const App = () => {
     <div>
       {selectedRecipe ? (
         <RecipePage
-          ricpe={selectedRecipe}
+          recipe={selectedRecipe}
           onBack={() => setSelectedRecipe(null)}
         />
       ) : (
