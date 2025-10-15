@@ -30,6 +30,10 @@ export const RecipePage = ({ recipe, onBack }) => {
 
   const [isFavourite, setFavourite] = useState(false);
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  useEffect(() => {
     const stored = localStorage.getItem(`favorite-${recipe.url}`);
     setFavourite(stored === "true");
   }, [recipe.url]);
