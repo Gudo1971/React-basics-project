@@ -116,13 +116,15 @@ export const StickyHeader = ({ onSuggest, title }) => {
           >
             💡 Suggest
           </Button>
-          <IconButton
-            icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+          <Button
             onClick={toggleColorMode}
-            aria-label="Toggle theme"
+            leftIcon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
             variant="ghost"
             size="sm"
-          />
+            colorScheme="gray"
+          >
+            {colorMode === "light" ? "Night Mode" : "Day Mode"}
+          </Button>
         </Flex>
 
         {/* Mobiele hamburger */}
