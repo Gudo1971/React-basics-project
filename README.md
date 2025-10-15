@@ -81,7 +81,6 @@ Vegetarian
 
 Pescatarian
 
-This feature is planned for future implementation.
 
 About the Developer
 My name is Gudo. I’m a technically skilled professional with a background in electrical engineering, machine control, and logistics. I’m currently training to become a Full Stack Developer, actively building knowledge in HTML, CSS, JavaScript, Node.js, and React. Taste Scout reflects my journey combining technical depth with visual clarity.
