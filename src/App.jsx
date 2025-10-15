@@ -1,40 +1,47 @@
 import { useState } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { RecipeListPage } from "./pages/RecipeListPage";
 import { RecipePage } from "./pages/RecipePage";
+import { FavoritesPage } from "./pages/FavoritesPage";
+// import { MiniNav } from "./components/ui/MiniNav";
 
-export const App = () => {
+export function App() {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // ✅ navigatiehook
 
   const handleSelect = (recipe) => {
-    console.log("Navigating to /recipe");
     setSelectedRecipe(recipe);
-    navigate("/recipe");
+    navigate("/recipe"); // ✅ navigeer direct
   };
 
   const handleBack = () => {
-    console.log("Navigating to /");
     setSelectedRecipe(null);
-    navigate("/");
+    navigate("/"); // ✅ terug naar lijst
   };
-  console.log("Current path:", window.location.pathname);
+
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={<RecipeListPage onSelectedRecipe={handleSelect} />}
-      />
-      <Route
-        path="/recipe"
-        element={
-          selectedRecipe ? (
-            <RecipePage recipe={selectedRecipe} onBack={handleBack} />
-          ) : (
-            <RecipeListPage onSelectedRecipe={handleSelect} />
-          )
-        }
-      />
-    </Routes>
+    <>
+      {/* <MiniNav /> */}
+      <Routes>
+        <Route
+          path="/"
+          element={<RecipeListPage onSelectedRecipe={handleSelect} />}
+        />
+        <Route
+          path="/favorites"
+          element={<FavoritesPage onSelectedRecipe={handleSelect} />}
+        />
+        <Route
+          path="/recipe"
+          element={
+            selectedRecipe ? (
+              <RecipePage recipe={selectedRecipe} onBack={handleBack} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+      </Routes>
+    </>
   );
-};
+}
