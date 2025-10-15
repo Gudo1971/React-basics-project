@@ -327,7 +327,7 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
                         )}
 
                         {recipe.cautions.length > 0 && (
-                          <Text fontSize="sm" color="red.400">
+                          <Text mt={2} mb={2} fontSize="sm" color="red.400">
                             <strong>Warning: </strong>{" "}
                             {recipe.cautions.join(", ")}
                           </Text>
