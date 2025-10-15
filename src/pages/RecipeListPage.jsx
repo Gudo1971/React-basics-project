@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import debounce from "lodash/debounce";
+
 import {
   Box,
   Image,
@@ -12,19 +14,38 @@ import {
   Button,
   SimpleGrid,
   useColorModeValue,
+  useColorMode,
+  IconButton,
+  Tooltip,
+  Badge,
 } from "@chakra-ui/react";
+import { StarIcon } from "@chakra-ui/icons";
 import { data } from "../utils/data";
 import { LabelBadges } from "../components/LabelBadges";
 import { StickyHeader } from "../components/StickyHeader";
+
 export const RecipeListPage = ({ onSelectedRecipe }) => {
+  const [inputValue, setInputValue] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedHealthLabels, setSelectedHealthLabels] = useState([]);
   const [selectedDiets, setSelectedDiets] = useState([]);
   const [selectedIngredient, setSelectedIngredient] = useState("");
 
+  const debouncedUpdate = useCallback(
+    debounce((value) => {
+      setSearchTerm(value);
+    }, 300),
+    []
+  );
+
+  useEffect(() => {
+    debouncedUpdate(inputValue);
+  }, [inputValue, debouncedUpdate]);
+
   const bg = useColorModeValue("gray.50", "gray.900");
   const cardBg = useColorModeValue("white", "gray.700");
   const textColor = useColorModeValue("gray.600", "gray.300");
+  const { colorMode } = useColorMode();
 
   const allIngredients = Array.from(
     new Set(
@@ -35,6 +56,7 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
   ).sort((a, b) => a.localeCompare(b));
 
   const handleResetFilters = () => {
+    setInputValue("");
     setSearchTerm("");
     setSelectedHealthLabels([]);
     setSelectedDiets([]);
@@ -43,11 +65,7 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
 
   const suggestRecipe = () => {
     const hour = new Date().getHours();
-    let meal;
-
-    if (hour < 11) meal = "Breakfast";
-    else if (hour < 17) meal = "Lunch";
-    else meal = "Dinner";
+    const meal = hour < 11 ? "Breakfast" : hour < 17 ? "Lunch" : "Dinner";
 
     const matching = data.hits.filter(({ recipe }) =>
       recipe.mealType?.includes(meal)
@@ -95,13 +113,9 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
 
   return (
     <>
-      {/* Sticky header */}
       <StickyHeader title="Taste Scout" onSuggest={suggestRecipe} />
-
-      {/* Main content */}
       <Box bg={bg} p={{ base: 4, md: 6 }}>
         <Flex direction={{ base: "column", md: "row" }} align="start" gap={6}>
-          {/* Sidebar filters */}
           <Box
             w={{ base: "100%", md: "250px" }}
             bg={cardBg}
@@ -113,7 +127,7 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
             alignSelf="start"
           >
             <Image
-              src="https://clipart-library.com/images/rijKyMB7T.gif"
+              src="./937034.png"
               alt="Grappige cartoon chef"
               borderRadius="xl"
               mb={4}
@@ -121,14 +135,15 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
               objectFit="cover"
               mx="auto"
             />
+
             <Heading size="md" mb={4} textAlign="center" color="teal.400">
               Filters
             </Heading>
 
             <Input
               placeholder="Search recipes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
               size="sm"
               variant="filled"
               mb={4}
@@ -180,7 +195,8 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
                 padding: "8px",
                 borderRadius: "6px",
                 border: "1px solid #CBD5E0",
-                backgroundColor: "#EDF2F7",
+                backgroundColor: colorMode === "light" ? "#EDF2F7" : "#2D3748",
+                color: colorMode === "light" ? "#2D3748" : "#EDF2F7",
                 marginBottom: "12px",
               }}
             >
@@ -217,78 +233,129 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
               </Text>
             ) : (
               <SimpleGrid
-                columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }}
+                columns={{ base: 1, sm: 2, lg: 3, xl: 4 }}
                 spacing={6}
               >
-                {filteredRecipes.map(({ recipe }) => (
-                  <Box
-                    key={recipe.label}
-                    borderRadius="2xl"
-                    boxShadow="xl"
-                    overflow="hidden"
-                    p={4}
-                    cursor="pointer"
-                    onClick={() => onSelectedRecipe(recipe)}
-                    _hover={{
-                      transform: "scale(1.05)",
-                      transition: "0.2s",
-                      bg: useColorModeValue("gray.100", "gray.600"),
-                    }}
-                    bg={cardBg}
-                    minH="320px"
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="space-between"
-                  >
-                    <Image
-                      src={recipe.image}
-                      alt={recipe.label}
-                      maxH="180px"
-                      objectFit="cover"
-                      borderRadius="lg"
-                      mx="auto"
-                      mb={2}
-                    />
+                {filteredRecipes.map(({ recipe }) => {
+                  const isFavourite =
+                    localStorage.getItem(`favorite-${recipe.url}`) === "true";
 
-                    <Box textAlign="center">
-                      <Heading size="md" mt={2} mb={2} color="teal.400">
-                        {recipe.label}
-                      </Heading>
+                  const toggleFavorite = (e) => {
+                    e.stopPropagation();
+                    const newValue = !isFavourite;
+                    localStorage.setItem(
+                      `favorite-${recipe.url}`,
+                      newValue.toString()
+                    );
+                    window.location.reload();
+                  };
 
-                      {recipe.dietLabels.length > 0 && (
-                        <Text fontSize="sm" color={textColor}>
-                          <strong>Diet: </strong> {recipe.dietLabels.join(", ")}
-                        </Text>
-                      )}
+                  return (
+                    <Box
+                      key={recipe.label}
+                      borderRadius="2xl"
+                      boxShadow="xl"
+                      overflow="hidden"
+                      p={4}
+                      cursor="pointer"
+                      onClick={() => onSelectedRecipe(recipe)}
+                      _hover={{
+                        transform: "scale(1.05)",
+                        transition: "0.2s",
+                        bg: bg,
+                      }}
+                      bg={cardBg}
+                      minH="320px"
+                      display="flex"
+                      flexDirection="column"
+                      justifyContent="start"
+                      position="relative"
+                    >
+                      {/* Sterretje op aparte regel */}
+                      <Flex justify="flex-end" mb={2}>
+                        <Tooltip
+                          label={
+                            isFavourite
+                              ? "Unmark as favorite"
+                              : "Mark as favorite"
+                          }
+                          hasArrow
+                        >
+                          <IconButton
+                            icon={<StarIcon />}
+                            onClick={toggleFavorite}
+                            aria-label="Toggle favorite"
+                            variant="ghost"
+                            color={isFavourite ? "yellow.400" : "gray.400"}
+                            fontSize="xl"
+                          />
+                        </Tooltip>
+                      </Flex>
 
-                      {recipe.cautions.length > 0 && (
-                        <Text fontSize="sm" color="red.400">
-                          <strong>Warning: </strong>{" "}
-                          {recipe.cautions.join(", ")}
-                        </Text>
-                      )}
+                      {/* Afbeelding */}
+                      <Image
+                        src={recipe.image}
+                        alt={recipe.label}
+                        maxH="180px"
+                        objectFit="cover"
+                        borderRadius="lg"
+                        mx="auto"
+                        mb={2}
+                      />
 
-                      {recipe.mealType && (
-                        <Text fontSize="sm" color={textColor}>
-                          <strong>Meal type: </strong>{" "}
-                          {recipe.mealType.join(", ")}
-                        </Text>
-                      )}
+                      <Box textAlign="center">
+                        <Heading size="md" mt={2} mb={2} color="teal.400">
+                          {recipe.label}
+                        </Heading>
 
-                      {recipe.dishType && (
-                        <Text fontSize="sm" color={textColor}>
-                          <strong>Dish type: </strong>{" "}
-                          {recipe.dishType.join(", ")}
-                        </Text>
-                      )}
+                        {/* Favorietenbadge onder titel */}
+                        {isFavourite && (
+                          <Badge
+                            colorScheme="yellow"
+                            mb={2}
+                            fontSize="0.8em"
+                            borderRadius="md"
+                          >
+                            ★ Favorite
+                          </Badge>
+                        )}
+
+                        {recipe.dietLabels.length > 0 && (
+                          <Text fontSize="sm" color={textColor}>
+                            <strong>Diet: </strong>{" "}
+                            {recipe.dietLabels.join(", ")}
+                          </Text>
+                        )}
+
+                        {recipe.cautions.length > 0 && (
+                          <Text fontSize="sm" color="red.400">
+                            <strong>Warning: </strong>{" "}
+                            {recipe.cautions.join(", ")}
+                          </Text>
+                        )}
+
+                        {recipe.mealType && (
+                          <Text fontSize="sm" color={textColor}>
+                            <strong>Meal type: </strong>{" "}
+                            {recipe.mealType.join(", ")}
+                          </Text>
+                        )}
+
+                        {recipe.dishType && (
+                          <Text fontSize="sm" color={textColor}>
+                            <strong>Dish type: </strong>{" "}
+                            {recipe.dishType.join(", ")}
+                          </Text>
+                        )}
+
+                        <LabelBadges
+                          dietLabels={recipe.dietLabels}
+                          healthLabels={recipe.healthLabels}
+                        />
+                      </Box>
                     </Box>
-
-                    <LabelBadges
-                      dietLabels={recipe.dietLabels}
-                      healthLabels={recipe.healthLabels}
-                    />
-                  </Box>
-                ))}
+                  );
+                })}
               </SimpleGrid>
             )}
           </Box>

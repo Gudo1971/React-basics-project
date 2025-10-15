@@ -1,5 +1,6 @@
 import {
   Box,
+  Flex,
   Image,
   Heading,
   Text,
@@ -9,10 +10,14 @@ import {
   Grid,
   GridItem,
   useColorModeValue,
+  IconButton,
+  Tooltip,
 } from "@chakra-ui/react";
 import { ArrowBackIcon, CheckCircleIcon } from "@chakra-ui/icons";
 import { LabelBadges } from "../components/LabelBadges";
 import { StickyHeader } from "../components/StickyHeader";
+import { useEffect, useState } from "react";
+import { StarIcon } from "@chakra-ui/icons";
 
 export const RecipePage = ({ recipe, onBack }) => {
   if (!recipe) return null;
@@ -23,6 +28,17 @@ export const RecipePage = ({ recipe, onBack }) => {
   const textColor = useColorModeValue("gray.800", "gray.100");
   const cautionBg = useColorModeValue("red.50", "red.900");
   const cautionText = useColorModeValue("red.500", "red.200");
+  const [isFavourite, setFavourite] = useState(false);
+  useEffect(() => {
+    const stored = localStorage.getItem(`favourite-$(recipe.url)`);
+    setFavourite(stored === "true");
+  }, [recipe.url]);
+
+  const toggleFavorite = () => {
+    const newValue = !isFavourite;
+    setFavourite(newValue);
+    localStorage.setItem(`favourite-$(recipe.url)`, newValue.toString());
+  };
 
   return (
     <>
@@ -37,14 +53,34 @@ export const RecipePage = ({ recipe, onBack }) => {
           borderRadius="2xl"
           boxShadow="2xl"
         >
-          <Button
-            leftIcon={<ArrowBackIcon />}
-            colorScheme="teal"
-            mb={6}
-            onClick={onBack}
-          >
-            Back to recipes
-          </Button>
+          <Flex justify="space-between" align="center" mb={6}>
+            <Button
+              leftIcon={<ArrowBackIcon />}
+              colorScheme="teal"
+              mb={6}
+              onClick={onBack}
+            >
+              Back to recipes
+            </Button>
+
+            <Tooltip
+              label={isFavourite ? "Unmark as favorite" : "Mark as favorite"}
+              hasArrow
+            >
+              <IconButton
+                icon={
+                  isFavourite ? <StarIcon color="yellow.400" /> : <StarIcon />
+                }
+                onClick={toggleFavorite}
+                aria-label={
+                  isFavourite ? "Unmark as favorite" : "Mark as favorite"
+                }
+                variant="ghost"
+                color={isFavourite ? "yellow.400" : "gray.400"}
+                fontSize="4xl"
+              />
+            </Tooltip>
+          </Flex>
 
           <Image
             src={recipe.image}
@@ -95,7 +131,7 @@ export const RecipePage = ({ recipe, onBack }) => {
               <Heading size="md" mb={4} color={headingColor}>
                 🧾 Ingredients
               </Heading>
-              <Box maxH="300px" overflowY="auto" pr={2}>
+              <Box maxH="300px" overflowY="hidden" pr={2}>
                 <Grid templateColumns={{ base: "1fr", sm: "1fr 1fr" }} gap={3}>
                   {recipe.ingredients.map((ingredient, index) => (
                     <GridItem key={index} display="flex" alignItems="start">
@@ -168,7 +204,7 @@ export const RecipePage = ({ recipe, onBack }) => {
           <Text fontStyle="italic" textAlign="center" mt={6} color={textColor}>
             Source:{" "}
             <a href={recipe.url} target="_blank" rel="noopener noreferrer">
-              {recipe.source}
+              {recipe.url}
             </a>
           </Text>
         </Box>
