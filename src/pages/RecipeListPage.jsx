@@ -247,7 +247,6 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
                       `favorite-${recipe.url}`,
                       newValue.toString()
                     );
-                    window.location.reload();
                   };
 
                   return (

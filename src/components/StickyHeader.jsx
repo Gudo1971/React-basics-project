@@ -1,25 +1,44 @@
 import {
   Box,
   Flex,
-  Stack,
-  Heading,
-  Image,
   IconButton,
   Button,
   Text,
   useColorMode,
+  useColorModeValue,
+  Image,
+  Link as ChakraLink,
+  useDisclosure,
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  DrawerHeader,
+  DrawerBody,
+  VStack,
 } from "@chakra-ui/react";
-import { MoonIcon, SunIcon } from "@chakra-ui/icons";
-import { Link, useNavigate } from "react-router-dom";
+import { MoonIcon, SunIcon, HamburgerIcon } from "@chakra-ui/icons";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
-export const StickyHeader = ({ title = "Taste Scout", onSuggest }) => {
+export const StickyHeader = ({ onSuggest }) => {
   const { colorMode, toggleColorMode } = useColorMode();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const navItems = [
+    { label: "Home", path: "/" },
+    { label: "Favorites", path: "/favorites" },
+    { label: "About", path: "/about" },
+  ];
+
+  const activeColor = useColorModeValue("teal.600", "teal.300");
+  const inactiveColor = useColorModeValue("gray.600", "gray.300");
 
   const handleSuggest = () => {
     if (onSuggest) {
-      onSuggest(); // zet recipe in state
-      navigate("/recipe"); // navigeer naar recipepagina
+      onSuggest();
+      navigate("/recipe");
     }
   };
 
@@ -27,61 +46,133 @@ export const StickyHeader = ({ title = "Taste Scout", onSuggest }) => {
     <Box
       position="sticky"
       top="0"
-      zIndex="5"
-      bg={colorMode === "light" ? "white" : "gray.700"}
+      zIndex="1000"
+      bg={useColorModeValue("white", "gray.800")}
       px={{ base: 4, md: 6 }}
       py={3}
       boxShadow="sm"
     >
-      <Stack
-        direction={["column", "row"]}
-        spacing={4}
+      <Flex
         align="center"
         justify="space-between"
+        direction={{ base: "row", md: "row" }}
       >
-        {/* Klikbaar logo */}
-        <Link to="/">
-          <Image
-            src="/TasteScoutLogo.png"
-            alt="Taste Scout Logo"
-            boxSize="80px"
-            objectFit="contain"
-            cursor="pointer"
-          />
-        </Link>
-
-        {/* Titel */}
-        <Box flex="1" textAlign="center">
-          <Heading color="teal.500" mb="0">
-            {title}
-          </Heading>
-        </Box>
-
-        {/* Suggestieknop + dark mode */}
+        {/* Logo + naam */}
         <Flex align="center" gap={3}>
+          <Link to="/">
+            <Image
+              src="/TasteScoutLogo.png"
+              alt="Taste Scout Logo"
+              boxSize="50px"
+              objectFit="contain"
+              cursor="pointer"
+            />
+          </Link>
+          <Text
+            fontSize="xl"
+            fontWeight="bold"
+            color="teal.500"
+            display={{ base: "block", md: "block" }}
+          >
+            Taste Scout
+          </Text>
+        </Flex>
+
+        {/* Desktop navigatie */}
+        <Flex gap={6} align="center" display={{ base: "none", md: "flex" }}>
+          {navItems.map((item) => (
+            <ChakraLink
+              as={Link}
+              to={item.path}
+              key={item.path}
+              fontWeight="medium"
+              color={
+                location.pathname === item.path ? activeColor : inactiveColor
+              }
+              _hover={{ textDecoration: "underline" }}
+            >
+              {item.label}
+            </ChakraLink>
+          ))}
           <Button
             onClick={handleSuggest}
             colorScheme="purple"
             size="sm"
             aria-label="Suggest me a recipe"
           >
-            💡 Suggest me a recipe
+            💡 Suggest
           </Button>
-
-          <Flex align="center" gap={2}>
-            <Text fontSize="sm" color="gray.500">
-              {colorMode === "light" ? "Light mode" : "Dark mode"}
-            </Text>
-            <IconButton
-              icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-              onClick={toggleColorMode}
-              aria-label="Toggle light/dark mode"
-              variant="ghost"
-              size="sm"
-            />
-          </Flex>
+          <IconButton
+            icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+            onClick={toggleColorMode}
+            aria-label="Toggle theme"
+            variant="ghost"
+            size="sm"
+          />
         </Flex>
-      </Stack>
+
+        {/* Mobile hamburger */}
+        <IconButton
+          icon={<HamburgerIcon />}
+          onClick={onOpen}
+          aria-label="Open menu"
+          display={{ base: "flex", md: "none" }}
+          variant="ghost"
+        />
+      </Flex>
+
+      {/* Drawer menu */}
+      <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerCloseButton />
+          <DrawerHeader>Menu</DrawerHeader>
+          <DrawerBody>
+            <VStack align="start" spacing={4}>
+              {navItems.map((item) => (
+                <Button
+                  as={Link}
+                  to={item.path}
+                  key={item.path}
+                  onClick={onClose}
+                  variant="ghost"
+                  colorScheme={
+                    location.pathname === item.path ? "teal" : "gray"
+                  }
+                  w="100%"
+                  justifyContent="start"
+                >
+                  {item.label}
+                </Button>
+              ))}
+              <Button
+                onClick={() => {
+                  handleSuggest();
+                  onClose();
+                }}
+                colorScheme="purple"
+                variant="ghost"
+                w="100%"
+                justifyContent="start"
+              >
+                💡 Suggest me a recipe
+              </Button>
+              <Button
+                onClick={() => {
+                  toggleColorMode();
+                  onClose();
+                }}
+                leftIcon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+                variant="ghost"
+                w="100%"
+                justifyContent="start"
+              >
+                {colorMode === "light" ? "Dark mode" : "Light mode"}
+              </Button>
+            </VStack>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
     </Box>
   );
 };
