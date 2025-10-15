@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { RecipeListPage } from "./pages/RecipeListPage";
 import { RecipePage } from "./pages/RecipePage";
 import { FavoritesPage } from "./pages/FavoritesPage";
+import { AboutPage } from "./pages/AboutPage";
 // import { MiniNav } from "./components/ui/MiniNav";
 
 export function App() {
@@ -23,6 +24,7 @@ export function App() {
     <>
       {/* <MiniNav /> */}
       <Routes>
+        <Route path="/about" element={<AboutPage />} />
         <Route
           path="/"
           element={<RecipeListPage onSelectedRecipe={handleSelect} />}
