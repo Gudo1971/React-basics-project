@@ -20,7 +20,7 @@ import {
 import { MoonIcon, SunIcon, HamburgerIcon } from "@chakra-ui/icons";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
-export const StickyHeader = ({ onSuggest }) => {
+export const StickyHeader = ({ onSuggest, title }) => {
   const { colorMode, toggleColorMode } = useColorMode();
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,9 +55,10 @@ export const StickyHeader = ({ onSuggest }) => {
       <Flex
         align="center"
         justify="space-between"
-        direction={{ base: "row", md: "row" }}
+        direction={{ base: "column", md: "row" }}
+        textAlign="center"
       >
-        {/* Logo + naam */}
+        {/* Linkerkant: logo + merknaam */}
         <Flex align="center" gap={3}>
           <Link to="/">
             <Image
@@ -78,7 +79,20 @@ export const StickyHeader = ({ onSuggest }) => {
           </Text>
         </Flex>
 
-        {/* Desktop navigatie */}
+        {/* Midden: paginatitel */}
+        {title && (
+          <Text
+            fontSize="xl"
+            fontWeight="bold"
+            color="teal.500"
+            mx={6}
+            display={{ base: "none", md: "block" }}
+          >
+            {title}
+          </Text>
+        )}
+
+        {/* Rechterkant: navigatie + suggestie + theme */}
         <Flex gap={6} align="center" display={{ base: "none", md: "flex" }}>
           {navItems.map((item) => (
             <ChakraLink
@@ -111,17 +125,18 @@ export const StickyHeader = ({ onSuggest }) => {
           />
         </Flex>
 
-        {/* Mobile hamburger */}
+        {/* Mobiele hamburger */}
         <IconButton
           icon={<HamburgerIcon />}
           onClick={onOpen}
           aria-label="Open menu"
           display={{ base: "flex", md: "none" }}
           variant="ghost"
+          mt={{ base: 2, md: 0 }}
         />
       </Flex>
 
-      {/* Drawer menu */}
+      {/* Mobiele drawer */}
       <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
         <DrawerOverlay />
         <DrawerContent>

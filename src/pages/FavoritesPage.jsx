@@ -11,7 +11,6 @@ import {
   Badge,
   Button,
   useColorModeValue,
-  useColorMode,
 } from "@chakra-ui/react";
 import { StarIcon } from "@chakra-ui/icons";
 import { StickyHeader } from "../components/StickyHeader";
@@ -23,7 +22,6 @@ export const FavoritesPage = ({ onSelectedRecipe }) => {
   const bg = useColorModeValue("gray.50", "gray.900");
   const cardBg = useColorModeValue("white", "gray.700");
   const textColor = useColorModeValue("gray.600", "gray.300");
-  const { colorMode } = useColorMode();
 
   useEffect(() => {
     const favs = data.hits
