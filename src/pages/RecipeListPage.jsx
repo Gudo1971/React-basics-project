@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import debounce from "lodash/debounce";
-
 import {
   Box,
   Image,
@@ -30,11 +29,10 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
   const [selectedHealthLabels, setSelectedHealthLabels] = useState([]);
   const [selectedDiets, setSelectedDiets] = useState([]);
   const [selectedIngredient, setSelectedIngredient] = useState("");
+  const [refreshTrigger, setRefreshTrigger] = useState(false);
 
   const debouncedUpdate = useCallback(
-    debounce((value) => {
-      setSearchTerm(value);
-    }, 300),
+    debounce((value) => setSearchTerm(value), 300),
     []
   );
 
@@ -66,26 +64,19 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
   const suggestRecipe = () => {
     const hour = new Date().getHours();
     const meal = hour < 11 ? "Breakfast" : hour < 17 ? "Lunch" : "Dinner";
-
     const matching = data.hits.filter(({ recipe }) =>
       recipe.mealType?.includes(meal)
     );
-
     const pool = matching.length > 0 ? matching : data.hits;
     const random = pool[Math.floor(Math.random() * pool.length)];
-
-    if (random) {
-      onSelectedRecipe(random.recipe);
-    }
+    if (random) onSelectedRecipe(random.recipe);
   };
 
   const filteredRecipes = data.hits.filter(({ recipe }) => {
     const term = searchTerm.toLowerCase();
-
     const matchesSearch =
       recipe.label.toLowerCase().includes(term) ||
       recipe.healthLabels.some((label) => label.toLowerCase().includes(term));
-
     const matchesHealth =
       selectedHealthLabels.length === 0 ||
       selectedHealthLabels.every((label) =>
@@ -93,7 +84,6 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
           .map((l) => l.toLowerCase())
           .includes(label.toLowerCase())
       );
-
     const matchesDiet =
       selectedDiets.length === 0 ||
       selectedDiets.some((diet) =>
@@ -101,21 +91,19 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
           .map((l) => l.toLowerCase())
           .includes(diet.toLowerCase())
       );
-
     const matchesIngredient =
       selectedIngredient === "" ||
       recipe.ingredients.some((i) =>
         i.food.toLowerCase().includes(selectedIngredient.toLowerCase())
       );
-
     return matchesSearch && matchesHealth && matchesDiet && matchesIngredient;
   });
-
   return (
     <>
       <StickyHeader title="Taste Scout" onSuggest={suggestRecipe} />
       <Box bg={bg} p={{ base: 4, md: 6 }}>
-        <Flex direction={{ base: "column", md: "row" }} align="start" gap={6}>
+        <Flex direction={{ base: "column", md: "row" }} gap={6}>
+          {/* 🔍 Sidebar met filters */}
           <Box
             w={{ base: "100%", md: "250px" }}
             bg={cardBg}
@@ -124,18 +112,16 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
             boxShadow="sm"
             position={{ base: "static", md: "sticky" }}
             top="100px"
-            alignSelf="start"
           >
             <Image
               src="./937034.png"
-              alt="Grappige cartoon chef"
+              alt="Chef"
               borderRadius="xl"
               mb={4}
               boxSize="150px"
               objectFit="cover"
               mx="auto"
             />
-
             <Heading size="md" mb={4} textAlign="center" color="teal.400">
               Filters
             </Heading>
@@ -178,16 +164,7 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
             <Text fontWeight="bold" mt={4} mb={2} color={textColor}>
               Ingredient:
             </Text>
-            <Box mb={2}>
-              <label
-                htmlFor="ingredient-select"
-                style={{ fontWeight: "bold", color: textColor }}
-              >
-                Select ingredient:
-              </label>
-            </Box>
             <select
-              id="ingredient-select"
               value={selectedIngredient}
               onChange={(e) => setSelectedIngredient(e.target.value)}
               style={{
@@ -218,7 +195,8 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
               Reset filters
             </Button>
           </Box>
-          {/* Recipe grid */}
+
+          {/* 🍽️ Recepten-grid */}
           <Box flex="1">
             {filteredRecipes.length === 0 ? (
               <Text
@@ -228,41 +206,33 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
                 color="red.500"
                 mt={8}
               >
-                No recipes match your filters. Try adjusting your search or
-                reset filters.
+                No recipes match your filters.
               </Text>
             ) : (
-              <SimpleGrid
-                columns={{ base: 1, sm: 2, lg: 3, xl: 4 }}
-                spacing={6}
-              >
+              <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} spacing={6}>
                 {filteredRecipes.map(({ recipe }) => {
                   const isFavourite =
                     localStorage.getItem(`favorite-${recipe.url}`) === "true";
 
                   const toggleFavorite = (e) => {
                     e.stopPropagation();
-                    const newValue = !isFavourite;
                     localStorage.setItem(
                       `favorite-${recipe.url}`,
-                      newValue.toString()
+                      (!isFavourite).toString()
                     );
+                    setRefreshTrigger((prev) => !prev);
                   };
 
                   return (
                     <Box
-                      key={recipe.label}
+                      key={`${recipe.label}-${refreshTrigger}`}
                       borderRadius="2xl"
                       boxShadow="xl"
                       overflow="hidden"
                       p={4}
                       cursor="pointer"
                       onClick={() => onSelectedRecipe(recipe)}
-                      _hover={{
-                        transform: "scale(1.05)",
-                        transition: "0.2s",
-                        bg: bg,
-                      }}
+                      _hover={{ transform: "scale(1.05)", transition: "0.2s" }}
                       bg={cardBg}
                       minH="320px"
                       display="flex"
@@ -270,7 +240,6 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
                       justifyContent="start"
                       position="relative"
                     >
-                      {/* Sterretje op aparte regel */}
                       <Flex justify="flex-end" mb={2}>
                         <Tooltip
                           label={
@@ -287,18 +256,17 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
                             variant="ghost"
                             color={isFavourite ? "yellow.400" : "gray.400"}
                             fontSize="xl"
+                            isRound
                           />
                         </Tooltip>
                       </Flex>
 
-                      {/* Afbeelding */}
                       <Image
                         src={recipe.image}
                         alt={recipe.label}
                         maxH="180px"
                         objectFit="cover"
                         borderRadius="lg"
-                        mx="auto"
                         mb={2}
                       />
 
@@ -307,7 +275,6 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
                           {recipe.label}
                         </Heading>
 
-                        {/* Favorietenbadge onder titel */}
                         {isFavourite && (
                           <Badge
                             colorScheme="yellow"
@@ -321,28 +288,28 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
 
                         {recipe.dietLabels.length > 0 && (
                           <Text fontSize="sm" color={textColor}>
-                            <strong>Diet: </strong>{" "}
+                            <strong>Diet: </strong>
                             {recipe.dietLabels.join(", ")}
                           </Text>
                         )}
 
                         {recipe.cautions.length > 0 && (
                           <Text mt={2} mb={2} fontSize="sm" color="red.400">
-                            <strong>Warning: </strong>{" "}
+                            <strong>Warning: </strong>
                             {recipe.cautions.join(", ")}
                           </Text>
                         )}
 
                         {recipe.mealType && (
                           <Text fontSize="sm" color={textColor}>
-                            <strong>Meal type: </strong>{" "}
+                            <strong>Meal type: </strong>
                             {recipe.mealType.join(", ")}
                           </Text>
                         )}
 
                         {recipe.dishType && (
                           <Text fontSize="sm" color={textColor}>
-                            <strong>Dish type: </strong>{" "}
+                            <strong>Dish type: </strong>
                             {recipe.dishType.join(", ")}
                           </Text>
                         )}

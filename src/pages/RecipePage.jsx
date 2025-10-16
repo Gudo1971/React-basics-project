@@ -45,7 +45,7 @@ export const RecipePage = ({ recipe, onBack }) => {
   };
 
   return (
-    <Box minH="100vh" bg={bg}>
+    <Box key={recipe.url} minH="100vh" bg={bg}>
       <StickyHeader title="Recipe Card" />
 
       <Box
@@ -72,15 +72,13 @@ export const RecipePage = ({ recipe, onBack }) => {
           >
             <IconButton
               icon={
-                isFavourite ? <StarIcon color="yellow.400" /> : <StarIcon />
+                <StarIcon color={isFavourite ? "yellow.400" : "gray.400"} />
               }
               onClick={toggleFavorite}
-              aria-label={
-                isFavourite ? "Unmark as favorite" : "Mark as favorite"
-              }
+              aria-label="Toggle favorite"
               variant="ghost"
-              color={isFavourite ? "yellow.400" : "gray.400"}
               fontSize="2xl"
+              isRound
             />
           </Tooltip>
         </Flex>
