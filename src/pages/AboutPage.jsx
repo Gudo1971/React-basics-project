@@ -36,7 +36,7 @@ export const AboutPage = () => {
         <Text fontSize="md" mb={6} color={textColor}>
           Taste Scout is your personal recipe explorer. It helps you discover
           delicious meals based on your preferences, dietary needs, and health
-          goals. Whether you’re vegan, vegetarian, or just curious — Taste Scout
+          goals. Whether you’re vegan, vegetarian, or just curious Taste Scout
           finds recipes that match your taste.
         </Text>
 
