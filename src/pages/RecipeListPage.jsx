@@ -194,6 +194,17 @@ export const RecipeListPage = ({ onSelectedRecipe }) => {
             >
               Reset filters
             </Button>
+
+            <Button
+              mt={6}
+              w="100%"
+              onClick={suggestRecipe}
+              colorScheme="purple"
+              size="sm"
+              aria-label="Suggest me a recipe"
+            >
+              💡 Suggest me a recipe
+            </Button>
           </Box>
 
           {/* 🍽️ Recepten-grid */}

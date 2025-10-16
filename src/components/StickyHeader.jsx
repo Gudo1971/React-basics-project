@@ -18,11 +18,11 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { MoonIcon, SunIcon, HamburgerIcon } from "@chakra-ui/icons";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
-export const StickyHeader = ({ onSuggest, title }) => {
+export const StickyHeader = ({ title }) => {
   const { colorMode, toggleColorMode } = useColorMode();
-  const navigate = useNavigate();
+
   const location = useLocation();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -34,13 +34,6 @@ export const StickyHeader = ({ onSuggest, title }) => {
 
   const activeColor = useColorModeValue("teal.600", "teal.300");
   const inactiveColor = useColorModeValue("gray.600", "gray.300");
-
-  const handleSuggest = () => {
-    if (onSuggest) {
-      onSuggest();
-      navigate("/recipe");
-    }
-  };
 
   return (
     <Box
@@ -108,14 +101,7 @@ export const StickyHeader = ({ onSuggest, title }) => {
               {item.label}
             </ChakraLink>
           ))}
-          <Button
-            onClick={handleSuggest}
-            colorScheme="purple"
-            size="sm"
-            aria-label="Suggest me a recipe"
-          >
-            💡 Suggest
-          </Button>
+
           <Button
             onClick={toggleColorMode}
             leftIcon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
@@ -162,18 +148,7 @@ export const StickyHeader = ({ onSuggest, title }) => {
                   {item.label}
                 </Button>
               ))}
-              <Button
-                onClick={() => {
-                  handleSuggest();
-                  onClose();
-                }}
-                colorScheme="purple"
-                variant="ghost"
-                w="100%"
-                justifyContent="start"
-              >
-                💡 Suggest me a recipe
-              </Button>
+
               <Button
                 onClick={() => {
                   toggleColorMode();
